@@ -1,0 +1,57 @@
+import machine # Importa funções de hardware do ESP32
+import dht     # Biblioteca para o sensor de temperatura DHT22
+import time    # Biblioteca para controle de tempo e pausas
+from machine import I2C, Pin
+from i2c_lcd import I2cLcd # Importa o driver do display LCD
+
+# --- Configurações de Hardware ---
+# Configura a comunicação I2C (SCL no pino 22, SDA no pino 21)
+i2c = I2C(0, scl=Pin(22), sda=Pin(21), freq=400000)
+# Inicializa o LCD no endereço 0x27 (padrão do Wokwi) com 2 linhas e 16 colunas
+lcd = I2cLcd(i2c, 0x27, 2, 16)
+
+# Configura o pino 15 como entrada para o sensor DHT22
+sensor = dht.DHT22(Pin(15))
+# Configura o pino 2 como saída para o LED de alerta
+led_alerta = Pin(2, Pin.OUT)
+
+# Variável para contar o tempo de funcionamento
+tempo_decorrido = 0
+
+lcd.putstr("Iniciando...") # Escreve mensagem inicial no LCD
+print("Sistema Iniciado!")
+time.sleep(2) # Pausa inicial de segurança
+
+while True:
+    try:
+        sensor.measure()    # Solicita que o sensor faça a leitura
+        temp = sensor.temperature() # Guarda o valor da temperatura
+        
+        tempo_decorrido += 2 # Soma 2 segundos a cada ciclo do loop
+        
+        lcd.clear() # Limpa a tela do LCD para a nova atualização
+        lcd.putstr("Temp: {} C".format(temp)) # Mostra temperatura na linha 1
+        
+        # --- Lógica de Alerta de 20 Segundos ---
+        if tempo_decorrido >= 20:
+            if temp > 38:
+                led_alerta.value(1)     # Liga o LED (Alerta)
+                lcd.move_to(0, 1)       # Move para a segunda linha
+                lcd.putstr("ALERTA: QUENTE!")
+                print("!!! ALERTA: ÁGUA QUENTE !!!")
+            else:
+                led_alerta.value(0)     # Mantém o LED desligado
+                lcd.move_to(0, 1)
+                lcd.putstr("Temperatura OK")
+        else:
+            # Enquanto não atinge 20 segundos, mostra contagem regressiva
+            led_alerta.value(0)
+            lcd.move_to(0, 1)
+            lcd.putstr("Aguarde: {}s".format(20 - tempo_decorrido))
+            
+        time.sleep(2) # Aguarda 2 segundos (limite de leitura do DHT22)
+        
+    except OSError as e:
+        lcd.clear()
+        lcd.putstr("Erro no Sensor")
+        print("Erro ao ler o sensor DHT22.")

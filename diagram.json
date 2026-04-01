@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "author": "Projeto Integrado Unifeob Eduardo, Elton, Kathlyn e Joice",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": { "env": "micropython-20231227-v1.22.0" }
+    },
+    { "type": "wokwi-dht22", "id": "dht1", "top": -190, "left": 140, "attrs": {} },
+    { "type": "wokwi-led", "id": "led1", "top": 120, "left": -150, "attrs": { "color": "red" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": 140, "left": -80, "attrs": { "value": "220" } },
+    {
+      "type": "wokwi-lcd1602",
+      "id": "lcd1",
+      "top": -224,
+      "left": -176.8,
+      "attrs": { "pins": "i2c" }
+    }
+  ],
+  "connections": [
+    [ "esp:3V3", "dht1:VCC", "red", [ "v-100", "h140" ] ],
+    [ "esp:15", "dht1:SDA", "green", [ "v-80", "h80" ] ],
+    [ "esp:GND.1", "dht1:GND", "black", [ "v-120", "h220" ] ],
+    [ "esp:2", "r1:1", "blue", [ "v40", "h-30" ] ],
+    [ "r1:2", "led1:A", "blue", [ "v0" ] ],
+    [ "esp:GND.2", "led1:C", "black", [ "v100", "h-140" ] ],
+    [ "esp:GND.1", "lcd1:GND", "black", [ "v-20", "h-100" ] ],
+    [ "esp:3V3", "lcd1:VCC", "red", [ "v-40", "h-80" ] ],
+    [ "esp:21", "lcd1:SDA", "orange", [ "v-60", "h-60" ] ],
+    [ "esp:22", "lcd1:SCL", "yellow", [ "v-80", "h-40" ] ]
+  ],
+  "dependencies": {}
+}
